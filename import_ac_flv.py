@@ -11,6 +11,85 @@ from .Utilities import *
 from .Blender import*
 from .Resources import *
 
+def build_flv(data, filename):
+
+    bpy.ops.object.add(type="ARMATURE")
+    ob = bpy.context.object
+    ob.rotation_euler = ( radians(90), 0, 0 )
+    ob.name = str(filename)
+
+    amt = ob.data
+    amt.name = str(filename)
+
+    empty_list = []
+
+    mesh_index = 0
+
+    for bone in data.bones:
+
+        empty = add_empty(bone.name, ob, bone.translation, bone.rotation, bone.scale)
+
+        empty_list.append(empty)
+
+    for flv_mesh in data.meshes:
+
+        mesh = bpy.data.meshes.new(str(mesh_index))
+        obj = bpy.data.objects.new(str(mesh_index), mesh)
+
+        bpy.context.collection.objects.link(obj)
+
+        obj.parent = ob
+
+        vertexList = {}
+        facesList = []
+        normals = []
+
+        last_vertex_count = 0
+
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+
+        # Set vertices
+        for j in range(len(flv_mesh.vertices.positions)):
+            vertex = bm.verts.new(flv_mesh.vertices.positions[j])
+
+            
+            if flv_mesh.vertices.normals != []:
+                vertex.normal = flv_mesh.vertices.normals[j]
+                normals.append(flv_mesh.vertices.normals[j])
+            
+            vertex.index = last_vertex_count + j
+
+            vertexList[last_vertex_count + j] = vertex
+
+        faces = StripToTriangle(flv_mesh.vertex_indices)
+
+        # Set faces
+        for j in range(0, len(flv_mesh.vertex_indices)):
+            try:
+                face = bm.faces.new([vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2] + last_vertex_count]])
+                face.smooth = True
+                facesList.append([face, [vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2]] + last_vertex_count]])
+            except:
+                pass
+
+        bm.to_mesh(mesh)
+        bm.free()
+
+        # Set normals
+        mesh.use_auto_smooth = True
+
+        if normals != []:
+            try:
+                mesh.normals_split_custom_set_from_vertices(normals)
+            except:
+                pass
+
+        last_vertex_count += len(flv_mesh.vertices.positions)
+
+        mesh_index += 1
+
+
 def main(filepath, files, clear_scene):
     if clear_scene:
         clearScene()
@@ -27,6 +106,14 @@ def main(filepath, files, clear_scene):
         file_size = os.path.getsize(path_to_file)
 
         br = BinaryReader(file, "<")
+        if file_extension == ".flv":
+
+            flver0 = FLVER0_CLASS()
+            flver0.read(br)
+
+            file.close()
+
+            build_flv(flver0, filename)
         
                 
 
