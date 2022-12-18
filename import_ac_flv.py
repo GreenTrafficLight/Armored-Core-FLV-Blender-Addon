@@ -79,12 +79,13 @@ def build_flv(data, filename):
         # Set normals
         mesh.use_auto_smooth = True
 
+        """
         if normals != []:
             try:
                 mesh.normals_split_custom_set_from_vertices(normals)
             except:
                 pass
-
+        """
         last_vertex_count += len(flv_mesh.vertices.positions)
 
         mesh_index += 1

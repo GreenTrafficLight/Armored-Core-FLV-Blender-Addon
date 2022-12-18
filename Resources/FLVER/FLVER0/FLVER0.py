@@ -57,7 +57,11 @@ class FLVER0_CLASS:
         print(br.tell())
 
         for i in range(dummy_count):
-            pass
+            dummy = FLVER_CLASS.DUMMY()
+            dummy.read(br, self.version)
+            self.dummies.append(dummy)
+
+        print(br.tell())
 
         for i in range(material_count):
             material = FLVER0_CLASS.MATERIAL()
@@ -104,12 +108,12 @@ class FLVER0_CLASS:
 
             save_position = br.tell()
 
+            save_position_textures_offset = br.tell()
+
             br.seek(name_offset)
             self.name = br.readString()
             br.seek(mtd_offset)
             self.mtd = br.readString()
-
-            save_position_textures_offset = br.tell()
 
             br.seek(textures_offset)
             texture_count = br.readByte()
@@ -124,6 +128,7 @@ class FLVER0_CLASS:
                 texture = FLVER0_CLASS.TEXTURE()
                 texture.read(br, flv)
                 self.textures.append(texture)
+                
 
             br.seek(save_position_textures_offset)
 
@@ -167,11 +172,15 @@ class FLVER0_CLASS:
             br.readUInt()
             br.readUInt()
 
+            save_position = br.tell()
+
             br.seek(path_offset)
             self.path = br.readString()
             if type_offset > 0:
                 br.seek(type_offset)
                 self.type = br.readString()
+
+            br.seek(save_position)
 
     class BUFFER_LAYOUT :
 

@@ -7,6 +7,40 @@ class FLVER_CLASS:
     def __init__(self) -> None:
         pass
 
+    class DUMMY:
+
+        def __init__(self) -> None:
+            self.Position = None
+            self.Forward = None
+            self.Upward = None
+            self.Reference_ID = 0
+            self.Parent_bone_index = -1
+            self.Attach_bone_index = -1
+            self.Color = None
+            self.Flag1 = False
+            self.Use_upward_vector = False
+            self.Unk30 = 0
+            self.Unk34 = 0
+
+        def read(self, br, version):
+
+            self.Position = Vector3.fromBytes(br.readBytes(12))
+            if version == 0x20010:
+                self.Color = (br.readByte(), br.readByte(), br.readByte(), br.readByte())
+            else:
+                self.Color = (br.readByte(), br.readByte(), br.readByte(), br.readByte())
+            self.Forward = Vector3.fromBytes(br.readBytes(12))
+            self.Reference_ID = br.readShort()
+            self.Parent_bone_index = br.readShort()
+            self.Upward = Vector3.fromBytes(br.readBytes(12))
+            self.Attach_bone_index = br.readShort()
+            self.Flag1 = br.readByte()
+            self.Use_upward_vector = br.readByte() == 1
+            self.Unk30 = br.readInt()
+            self.Unk34 = br.readInt()
+            br.readInt()
+            br.readInt()
+        
     class BONE:
         
         def __init__(self) -> None:
@@ -108,156 +142,6 @@ class FLVER_CLASS:
             tangent = 6
             bitangent = 7
             vertex_color = 10
-
-    class VERTEX:
-
-        def __init__(self) -> None:
-            self.position = None
-            self.bone_weights = None
-            self.bone_indices = None
-            self.normal = None
-            self.normal_w = 0
-            self.uvs = []
-            self.tangent = []
-            self.bitangent = None
-            self.colors = []
-
-        def read(self, br, layout, uv_factor):
-
-            for member in layout.members:
-
-                if (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.position):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float3):
-
-                        self.position = (br.readFloat(), br.readFloat(), br.readFloat())
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float4):
-
-                        self.position = (br.readFloat(), br.readFloat(), br.readFloat())
-                        br.readFloat()
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.edge_compressed):
-
-                        pass
-
-                    else:
-
-                        pass
-
-                elif (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.bone_weights):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4A):
-
-                        self.bone_weights = (br.readByte() / 127, br.readByte() / 127, br.readByte() / 127, br.readByte() / 127)
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4C):
-
-                        self.bone_weights = (br.readUByte() / 255, br.readUByte() / 255, br.readUByte() / 255, br.readUByte() / 255)
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.uv_pair or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short4_to_float4A):
-
-                         self.bone_weights = (br.readUShort() / 32767, br.readUShort() / 32767, br.readUShort() / 32767, br.readUShort() / 32767)
-
-                    else:
-                        pass
-
-                elif (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.bone_indices):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4B or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4E):
-
-                        self.bone_indices = (br.readUByte(), br.readUByte(), br.readUByte(), br.readUByte())
-
-                    elif (member.Type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short_bone_indices):
-
-                        self.bone_indices = (br.readUShort(), br.readUShort(), br.readUShort(), br.readUShort())
-
-                elif (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.normal):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float3):
-
-                        self.normal = (br.readFloat(), br.readFloat(), br.readFloat())
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float4):
-
-                        self.normal = (br.readFloat(), br.readFloat(), br.readFloat())
-                        w = br.readFloat()
-                        self.normal_w = int(w)
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4A or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4B or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4C or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4D or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4E):
-                
-                        self.normal = ((br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127)
-                        self.normal_w = br.readUByte()
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short2_to_float2):
-
-                        self.normal_w = br.readUByte()
-                        z, y, x = br.readByte() / 127, br.readByte() / 127, br.readByte() / 127
-                        self.normal = (x, y, z)
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short4_to_float4A or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short4_to_float4B):
-
-                        self.normal = (br.readUShort() / 32767, br.readUShort() / 32767, br.readUShort() / 32767)
-                        self.normal_w = br.readUShort()
-
-                elif (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.uv):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float2):
-
-                        self.uvs.append((br.readFloat(), br.readFloat()))
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float3):
-
-                        self.uvs.append = ((br.readFloat(), br.readFloat(), br.readFloat()))
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float4):
-
-                        self.uvs.append((br.readFloat(), br.readFloat()))
-                        self.uvs.append((br.readFloat(), br.readFloat()))
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4A or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4B or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short2_to_float2 or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4C or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.uv):
-
-                        self.uvs.append((br.readUShort() / uv_factor, br.readUShort() / uv_factor))
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.uv_pair):
-
-                        self.uvs.append((br.readUShort() / uv_factor, br.readUShort() / uv_factor))
-                        self.uvs.append((br.readUShort() / uv_factor, br.readUShort() / uv_factor))
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short4_to_float4B):
-
-                        self.uvs.append((br.readUShort() / uv_factor, br.readUShort() / uv_factor, br.readUShort() / uv_factor))
-                        br.readUShort()
-
-                elif (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.tangent):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float4):
-
-                        self.tangent.append((Vector4.fromBytes(br.readBytes(16))))
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4A or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4B or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4C or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4D or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4E):
-
-                        self.tangent.append(((br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127))
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short4_to_float4A):
-
-                        self.tangent.append((br.readUShort() / 32767, br.readUShort() / 32767, br.readUShort() / 32767, br.readUShort() / 32767))
-
-                elif (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.bitangent):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4A or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4B or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4C or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4D or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4E):
-
-                        self.bitangent = ((br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127, (br.readUByte() - 127) / 127)
-
-                elif (member.semantic == FLVER_CLASS.LAYOUT_MEMBER.SEMANTIC.vertex_color):
-
-                    if (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.float4):
-
-                        self.colors.append([br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat()])
-
-                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4A or member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.byte4C):
-
-                        self.colors.append([br.readUByte() / 255, br.readUByte() / 255, br.readUByte() / 255, br.readUByte() / 255])
 
     class VERTICES:
 

@@ -90,3 +90,12 @@ class BinaryReader:
                 if b < 127:
                     string += chr(b)
             return string
+
+    def getBoolean(self, offset):
+        save_position = self.tell()
+        self.seek(offset)
+        boolean = self.readByte() == 1
+        self.seek(save_position)
+
+        return boolean
+

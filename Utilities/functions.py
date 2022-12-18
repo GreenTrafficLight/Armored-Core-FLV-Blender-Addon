@@ -34,3 +34,13 @@ def ToTriangle(triangleList):
         c  = triangleList[i]
         faces.append([a,b,c])
     return faces
+
+def reverseBits(value):
+    return (((value & 1) << 7)  | 
+            ((value & 2) << 5)  | 
+            ((value & 4) << 3)  | 
+            ((value & 8) << 1)  | 
+            ((value & 16) >> 1) |
+            ((value & 32) >> 3) | 
+            ((value & 64) >> 5) | 
+            ((value & 128) >> 7))
