@@ -40,7 +40,7 @@ class ImportArmoredCoreFLV(Operator, ImportHelper):
         return {'FINISHED'}
 
 def menu_func_import(self, context):
-    self.layout.operator(ImportArmoredCoreFLV.bl_idname, text="Battle Gear 4")
+    self.layout.operator(ImportArmoredCoreFLV.bl_idname, text="Armored Core FLV")
 
 
 def register():

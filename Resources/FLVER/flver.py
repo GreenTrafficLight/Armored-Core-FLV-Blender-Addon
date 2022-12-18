@@ -59,17 +59,17 @@ class FLVER_CLASS:
 
         def read(self, br, unicode):
 
-            self.translation = Vector3.fromBytes(br.readBytes(12))
+            self.translation = (br.readFloat(), br.readFloat(), br.readFloat())
             name_offset = br.readInt()
-            self.rotation = Vector3.fromBytes(br.readBytes(12))
+            self.rotation = (br.readFloat(), br.readFloat(), br.readFloat())
             self.parent_index = br.readShort()
             self.child_index = br.readShort()
-            self.scale = Vector3.fromBytes(br.readBytes(12))
+            self.scale = (br.readFloat(), br.readFloat(), br.readFloat())
             self.next_sibling_index = br.readShort()
             self.previous_sibling_index = br.readShort()
-            self.bouding_box_min = Vector3.fromBytes(br.readBytes(12))
+            self.bouding_box_min = (br.readFloat(), br.readFloat(), br.readFloat())
             self.unk_3C = br.readInt()
-            self.bouding_box_max = Vector3.fromBytes(br.readBytes(12))
+            self.bouding_box_max = (br.readFloat(), br.readFloat(), br.readFloat())
             br.seek(0x34, 1)
             save_position = br.tell()
             br.seek(name_offset)

@@ -29,6 +29,10 @@ def build_flv(data, filename):
 
         empty = add_empty(bone.name, ob, bone.translation, bone.rotation, bone.scale)
 
+        if bone.parent_index != -1:
+
+            empty.parent = empty_list[bone.parent_index]
+
         empty_list.append(empty)
 
     for flv_mesh in data.meshes:
