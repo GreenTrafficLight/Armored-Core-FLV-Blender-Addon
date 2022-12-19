@@ -15,7 +15,6 @@ def build_flv(data, filename):
 
     bpy.ops.object.add(type="ARMATURE")
     ob = bpy.context.object
-    ob.rotation_euler = ( radians(90), 0, 0 )
     ob.name = str(filename)
 
     amt = ob.data
@@ -27,7 +26,7 @@ def build_flv(data, filename):
 
     for bone in data.bones:
 
-        empty = add_empty(bone.name, ob, bone.translation, bone.rotation, bone.scale)
+        empty = add_empty(bone.name, ob, bone.translation)
 
         if bone.parent_index != -1:
 
@@ -54,45 +53,54 @@ def build_flv(data, filename):
         bm.from_mesh(mesh)
 
         # Set vertices
-        for j in range(len(flv_mesh.vertices.positions)):
-            vertex = bm.verts.new(flv_mesh.vertices.positions[j])
+        if mesh_index == 2:
 
-            
-            if flv_mesh.vertices.normals != []:
-                vertex.normal = flv_mesh.vertices.normals[j]
-                normals.append(flv_mesh.vertices.normals[j])
-            
-            vertex.index = last_vertex_count + j
+            for j in range(len(flv_mesh.vertices.positions)):
 
-            vertexList[last_vertex_count + j] = vertex
+                if flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]] == 50 or flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]] == 56:
+                    print("test")
+                    print(empty_list[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]]].matrix_world)
+                    test =  empty_list[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]]].matrix_world @ Matrix.Translation(flv_mesh.vertices.positions[j])
+                    vertex = bm.verts.new(test.translation)
 
-        faces = StripToTriangle(flv_mesh.vertex_indices)
+                    
+                    if flv_mesh.vertices.normals != []:
+                        vertex.normal = flv_mesh.vertices.normals[j]
+                        normals.append(flv_mesh.vertices.normals[j])
+                    
+                    vertex.index = last_vertex_count + j
 
-        # Set faces
-        for j in range(0, len(flv_mesh.vertex_indices)):
-            try:
-                face = bm.faces.new([vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2] + last_vertex_count]])
-                face.smooth = True
-                facesList.append([face, [vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2]] + last_vertex_count]])
-            except:
-                pass
+                    vertexList[last_vertex_count + j] = vertex
 
-        bm.to_mesh(mesh)
-        bm.free()
+            faces = StripToTriangle(flv_mesh.vertex_indices)
 
-        # Set normals
-        mesh.use_auto_smooth = True
+            # Set faces
+            for j in range(0, len(flv_mesh.vertex_indices)):
+                try:
+                    face = bm.faces.new([vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2] + last_vertex_count]])
+                    face.smooth = True
+                    facesList.append([face, [vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2]] + last_vertex_count]])
+                except:
+                    pass
 
-        """
-        if normals != []:
-            try:
-                mesh.normals_split_custom_set_from_vertices(normals)
-            except:
-                pass
-        """
-        last_vertex_count += len(flv_mesh.vertices.positions)
+            bm.to_mesh(mesh)
+            bm.free()
+
+            # Set normals
+            mesh.use_auto_smooth = True
+
+            """
+            if normals != []:
+                try:
+                    mesh.normals_split_custom_set_from_vertices(normals)
+                except:
+                    pass
+            """
+            last_vertex_count += len(flv_mesh.vertices.positions)
 
         mesh_index += 1
+
+    ob.rotation_euler = ( radians(90), 0, 0 )
 
 
 def main(filepath, files, clear_scene):

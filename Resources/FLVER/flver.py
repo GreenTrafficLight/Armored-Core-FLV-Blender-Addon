@@ -1,5 +1,7 @@
 from enum import Enum
 
+from mathutils import *
+
 from ...Utilities import *
 
 class FLVER_CLASS:
@@ -59,12 +61,12 @@ class FLVER_CLASS:
 
         def read(self, br, unicode):
 
-            self.translation = (br.readFloat(), br.readFloat(), br.readFloat())
+            self.translation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             name_offset = br.readInt()
-            self.rotation = (br.readFloat(), br.readFloat(), br.readFloat())
+            self.rotation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.parent_index = br.readShort()
             self.child_index = br.readShort()
-            self.scale = (br.readFloat(), br.readFloat(), br.readFloat())
+            self.scale = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.next_sibling_index = br.readShort()
             self.previous_sibling_index = br.readShort()
             self.bouding_box_min = (br.readFloat(), br.readFloat(), br.readFloat())
@@ -170,7 +172,7 @@ class FLVER_CLASS:
 
                         for i in range(vertex_count):
                             br.seek(save_position + layout.size * i + position)
-                            self.positions.append([br.readFloat(), br.readFloat(), br.readFloat()])
+                            self.positions.append(Vector((br.readFloat(), br.readFloat(), br.readFloat())))
                         
                         position += 12
                         
@@ -178,7 +180,7 @@ class FLVER_CLASS:
 
                         for i in range(vertex_count):
                             br.seek(save_position + layout.size * i + position)
-                            self.position.append([br.readFloat(), br.readFloat(), br.readFloat()])
+                            self.position.append(Vector((br.readFloat(), br.readFloat(), br.readFloat())))
                             br.readFloat()
                         
                         position += 16
@@ -260,7 +262,7 @@ class FLVER_CLASS:
 
                         for i in range(vertex_count):
                             br.seek(save_position + layout.size * i + position)     
-                            self.normal_ws.append(br.readUByte())
+                            self.bone_indices.append(br.readUByte())
                             z, y, x = br.readByte() / 127, br.readByte() / 127, br.readByte() / 127
                             self.normals.append([x, y, z])
 
