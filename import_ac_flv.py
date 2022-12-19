@@ -26,13 +26,20 @@ def build_flv(data, filename):
 
     for bone in data.bones:
 
-        empty = add_empty(bone.name, ob, bone.translation)
+        empty = add_empty(bone.name, ob, bone.translation, bone.rotation, bone.scale)
+
+        #empty.matrix_world = bone.computeWorldTransform()
 
         if bone.parent_index != -1:
 
             empty.parent = empty_list[bone.parent_index]
 
         empty_list.append(empty)
+
+    empty = add_empty("test", ob)
+
+    empty.parent = empty_list[-1]
+
 
     for flv_mesh in data.meshes:
 
@@ -53,50 +60,48 @@ def build_flv(data, filename):
         bm.from_mesh(mesh)
 
         # Set vertices
-        if mesh_index == 2:
+        #if mesh_index != -1:
 
-            for j in range(len(flv_mesh.vertices.positions)):
+        for j in range(len(flv_mesh.vertices.positions)):
 
-                if flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]] == 50 or flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]] == 56:
-                    print("test")
-                    print(empty_list[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]]].matrix_world)
-                    test =  empty_list[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]]].matrix_world @ Matrix.Translation(flv_mesh.vertices.positions[j])
-                    vertex = bm.verts.new(test.translation)
+            #if flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]] == 276:
+                test =  empty_list[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]]].matrix_world @ Matrix.Translation(flv_mesh.vertices.positions[j])
+                vertex = bm.verts.new(test.translation)
 
-                    
-                    if flv_mesh.vertices.normals != []:
-                        vertex.normal = flv_mesh.vertices.normals[j]
-                        normals.append(flv_mesh.vertices.normals[j])
-                    
-                    vertex.index = last_vertex_count + j
+                
+                if flv_mesh.vertices.normals != []:
+                    vertex.normal = flv_mesh.vertices.normals[j]
+                    normals.append(flv_mesh.vertices.normals[j])
+                
+                vertex.index = last_vertex_count + j
 
-                    vertexList[last_vertex_count + j] = vertex
+                vertexList[last_vertex_count + j] = vertex
 
-            faces = StripToTriangle(flv_mesh.vertex_indices)
+        faces = StripToTriangle(flv_mesh.vertex_indices)
 
-            # Set faces
-            for j in range(0, len(flv_mesh.vertex_indices)):
-                try:
-                    face = bm.faces.new([vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2] + last_vertex_count]])
-                    face.smooth = True
-                    facesList.append([face, [vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2]] + last_vertex_count]])
-                except:
-                    pass
+        # Set faces
+        for j in range(0, len(flv_mesh.vertex_indices)):
+            try:
+                face = bm.faces.new([vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2] + last_vertex_count]])
+                face.smooth = True
+                facesList.append([face, [vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2]] + last_vertex_count]])
+            except:
+                pass
 
-            bm.to_mesh(mesh)
-            bm.free()
+        bm.to_mesh(mesh)
+        bm.free()
 
-            # Set normals
-            mesh.use_auto_smooth = True
+        # Set normals
+        mesh.use_auto_smooth = True
 
-            """
-            if normals != []:
-                try:
-                    mesh.normals_split_custom_set_from_vertices(normals)
-                except:
-                    pass
-            """
-            last_vertex_count += len(flv_mesh.vertices.positions)
+        """
+        if normals != []:
+            try:
+                mesh.normals_split_custom_set_from_vertices(normals)
+            except:
+                pass
+        """
+        last_vertex_count += len(flv_mesh.vertices.positions)
 
         mesh_index += 1
 
