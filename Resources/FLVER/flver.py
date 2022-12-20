@@ -1,8 +1,8 @@
 from enum import Enum
-
 from mathutils import *
-
 from ...Utilities import *
+
+import math
 
 class FLVER_CLASS:
 
@@ -63,7 +63,7 @@ class FLVER_CLASS:
 
             self.translation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             name_offset = br.readInt()
-            self.rotation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
+            self.rotation = Euler((br.readFloat(), br.readFloat(), br.readFloat()), "XYZ")
             self.parent_index = br.readShort()
             self.child_index = br.readShort()
             self.scale = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
@@ -268,7 +268,7 @@ class FLVER_CLASS:
                             br.seek(save_position + layout.size * i + position)     
                             self.bone_indices.append(br.readUByte())
                             z, y, x = br.readByte() / 127, br.readByte() / 127, br.readByte() / 127
-                            self.normals.append([x, y, z])
+                            self.normals.append(Vector((x, y, z)).normalized())
 
                         position += 4
 

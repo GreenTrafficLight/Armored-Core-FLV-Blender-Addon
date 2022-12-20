@@ -62,7 +62,7 @@ def build_flv(data, filename):
                 bone_matrix = Matrix.Identity(4)
                 bone = data.bones[bone_indice]
                 while True:
-                    bone_matrix @= Matrix.Scale(1, 4, bone.scale) @ Matrix.Translation(bone.translation)
+                    bone_matrix = Matrix.Translation(bone.translation) @ bone.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, bone.scale) @ bone_matrix
                     if bone.parent_index == -1:
                         matrices.append(bone_matrix)
                         break
@@ -82,7 +82,7 @@ def build_flv(data, filename):
 
                 vertexList[last_vertex_count + j] = vertex
 
-        faces = StripToTriangle(flv_mesh.vertex_indices)
+        faces = StripToTriangle(flv_mesh.vertex_indices, True)
 
         # Set faces
         for j in range(0, len(flv_mesh.vertex_indices)):
@@ -99,13 +99,12 @@ def build_flv(data, filename):
         # Set normals
         mesh.use_auto_smooth = True
 
-        """
         if normals != []:
             try:
                 mesh.normals_split_custom_set_from_vertices(normals)
             except:
                 pass
-        """
+
         last_vertex_count += len(flv_mesh.vertices.positions)
 
         mesh_index += 1
