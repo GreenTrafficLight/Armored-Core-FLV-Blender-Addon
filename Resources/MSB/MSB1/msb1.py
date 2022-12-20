@@ -41,4 +41,5 @@ class MSB1 :
 
     class MODEL_PARAM(PARAM):
 
-        
+        def read_entry(self):
+            pass
