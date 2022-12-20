@@ -36,11 +36,6 @@ def build_flv(data, filename):
 
         empty_list.append(empty)
 
-    empty = add_empty("test", ob)
-
-    empty.parent = empty_list[-1]
-
-
     for flv_mesh in data.meshes:
 
         mesh = bpy.data.meshes.new(str(mesh_index))
@@ -59,16 +54,26 @@ def build_flv(data, filename):
         bm = bmesh.new()
         bm.from_mesh(mesh)
 
-        # Set vertices
-        #if mesh_index != -1:
+        matrices = []
+        for bone_indice in flv_mesh.bone_indices:
 
+            if bone_indice != 65535:
+
+                bone_matrix = Matrix.Identity(4)
+                bone = data.bones[bone_indice]
+                while True:
+                    bone_matrix @= Matrix.Scale(1, 4, bone.scale) @ Matrix.Translation(bone.translation)
+                    if bone.parent_index == -1:
+                        matrices.append(bone_matrix)
+                        break
+                    bone = data.bones[bone.parent_index]
+
+        # Set vertices
         for j in range(len(flv_mesh.vertices.positions)):
 
-            #if flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]] == 276:
-                test =  empty_list[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[j]]].matrix_world @ Matrix.Translation(flv_mesh.vertices.positions[j])
-                vertex = bm.verts.new(test.translation)
+                transformation =  matrices[flv_mesh.vertices.bone_indices[j]] @ Matrix.Translation(flv_mesh.vertices.positions[j])
+                vertex = bm.verts.new(transformation.translation)
 
-                
                 if flv_mesh.vertices.normals != []:
                     vertex.normal = flv_mesh.vertices.normals[j]
                     normals.append(flv_mesh.vertices.normals[j])

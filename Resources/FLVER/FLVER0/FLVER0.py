@@ -102,7 +102,7 @@ class FLVER0_CLASS:
             textures_offset = br.readInt()
             layouts_offset = br.readInt()
             br.readInt()
-            layout_header_offset = br.readInt()
+            layout_header_offset = br.readInt() # to fix with little endian
             br.readInt()
             br.readInt()
 
