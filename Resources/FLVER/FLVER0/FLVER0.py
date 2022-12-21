@@ -286,16 +286,8 @@ class FLVER0_CLASS:
             self.layout_index = buffer.layout_index
             layout = flv.materials[self.material_index].layouts[self.layout_index]
 
-            uv_factor = 1024
+            uv_factor = 2048
             
-            """
-            for i in range(vertex_count):
-                
-                vertex = FLVER_CLASS.VERTEX()
-                print(br.tell())
-                vertex.read(br, layout, uv_factor)
-                self.vertices.append(vertex)
-            """
             self.vertices = FLVER_CLASS.VERTICES()
             self.vertices.read(br, layout, uv_factor, vertex_count)
 

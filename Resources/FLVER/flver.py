@@ -80,7 +80,7 @@ class FLVER_CLASS:
 
         def computeWorldTransform(self):
 
-            return Matrix.Scale(1, 4, self.scale) @ Matrix.Rotation(0, 4, (self.rotation[0], self.rotation[1], self.rotation[2])) @ Matrix.Translation(self.translation)
+            return Matrix.Translation(self.translation) @ self.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
 
     class LAYOUT_MEMBER :
 
@@ -312,7 +312,7 @@ class FLVER_CLASS:
 
                         for i in range(vertex_count):
                             br.seek(save_position + layout.size * i + position)
-                            self.uvs.append([br.readUShort() / uv_factor, br.readUShort() / uv_factor])
+                            self.uvs.append([br.readShort() / uv_factor, br.readShort() / uv_factor])
 
                         position += 4
 
@@ -320,8 +320,8 @@ class FLVER_CLASS:
 
                         for i in range(vertex_count):
                             br.seek(save_position + layout.size * i + position)
-                            self.uvs.append([br.readUShort() / uv_factor, br.readUShort() / uv_factor])
-                            self.uvs.append([br.readUShort() / uv_factor, br.readUShort() / uv_factor])
+                            self.uvs.append([br.readShort() / uv_factor, br.readShort() / uv_factor])
+                            self.uvs.append([br.readShort() / uv_factor, br.readShort() / uv_factor])
 
                         position += 8
 
@@ -329,8 +329,8 @@ class FLVER_CLASS:
 
                         for i in range(vertex_count):
                             br.seek(save_position + layout.size * i + position)
-                            self.uvs.append([br.readUShort() / uv_factor, br.readUShort() / uv_factor, br.readUShort() / uv_factor])
-                            br.readUShort()
+                            self.uvs.append([br.readShort() / uv_factor, br.readShort() / uv_factor, br.readShort() / uv_factor])
+                            br.readShort()
 
                         position += 8
 

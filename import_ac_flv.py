@@ -28,8 +28,6 @@ def build_flv(data, filename):
 
         empty = add_empty(bone.name, ob, bone.translation, bone.rotation, bone.scale)
 
-        #empty.matrix_world = bone.computeWorldTransform()
-
         if bone.parent_index != -1:
 
             empty.parent = empty_list[bone.parent_index]
@@ -62,7 +60,7 @@ def build_flv(data, filename):
                 bone_matrix = Matrix.Identity(4)
                 bone = data.bones[bone_indice]
                 while True:
-                    bone_matrix = Matrix.Translation(bone.translation) @ bone.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, bone.scale) @ bone_matrix
+                    bone_matrix = bone.computeWorldTransform() @ bone_matrix
                     if bone.parent_index == -1:
                         matrices.append(bone_matrix)
                         break
@@ -71,8 +69,11 @@ def build_flv(data, filename):
         # Set vertices
         for j in range(len(flv_mesh.vertices.positions)):
 
-                transformation =  matrices[flv_mesh.vertices.bone_indices[j]] @ Matrix.Translation(flv_mesh.vertices.positions[j])
-                vertex = bm.verts.new(transformation.translation)
+                if flv_mesh.vertices.bone_indices != []:
+                    transformation =  matrices[flv_mesh.vertices.bone_indices[j]] @ Matrix.Translation(flv_mesh.vertices.positions[j])
+                    vertex = bm.verts.new(transformation.translation)
+                else:
+                    vertex = bm.verts.new(flv_mesh.vertices.positions[j])
 
                 if flv_mesh.vertices.normals != []:
                     vertex.normal = flv_mesh.vertices.normals[j]
@@ -93,6 +94,16 @@ def build_flv(data, filename):
             except:
                 pass
 
+        if flv_mesh.vertices.uvs != []:
+
+            uv_name = "UV1Map"
+            uv_layer1 = bm.loops.layers.uv.get(uv_name) or bm.loops.layers.uv.new(uv_name)
+
+            for f in bm.faces:
+                for l in f.loops:
+                    if l.vert.index >= last_vertex_count:
+                        l[uv_layer1].uv = [flv_mesh.vertices.uvs[l.vert.index - last_vertex_count][0], 1 - flv_mesh.vertices.uvs[l.vert.index - last_vertex_count][1]]
+
         bm.to_mesh(mesh)
         bm.free()
 
@@ -105,8 +116,15 @@ def build_flv(data, filename):
             except:
                 pass
 
-        last_vertex_count += len(flv_mesh.vertices.positions)
+        # Set material
+        flv_material = data.materials[flv_mesh.material_index]
+        material = bpy.data.materials.get(flv_material.name)
+        if not material:
+            material = bpy.data.materials.new(flv_material.name)
 
+        mesh.materials.append(material)
+
+        last_vertex_count += len(flv_mesh.vertices.positions)
         mesh_index += 1
 
     ob.rotation_euler = ( radians(90), 0, 0 )
