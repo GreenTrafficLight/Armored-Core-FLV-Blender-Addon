@@ -155,6 +155,12 @@ def main(filepath, files, clear_scene):
 
             build_flv(flver0, filename)
         
+        elif file_extension == ".msb":
+
+            msb = MSB1()
+            br.endian = ">"
+            msb.read(br)
+        
                 
 
     
