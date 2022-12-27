@@ -11,6 +11,33 @@ from .Utilities import *
 from .Blender import*
 from .Resources import *
 
+def build_msb(data, filename):
+
+    bpy.ops.object.add(type="ARMATURE")
+    ob = bpy.context.object
+    ob.name = str(filename)
+    ob.rotation_euler = ( radians(90), 0, 0 )
+
+    part_map_pieces_empty = add_empty("part_map_pieces", ob)
+
+    for part_map_piece in data.parts.map_pieces:
+
+        add_empty(part_map_piece.Name, part_map_pieces_empty, part_map_piece.Position, part_map_piece.Rotation, part_map_piece.Scale)
+
+    part_objects_empty = add_empty("part_objects", ob)
+
+    for part_object in data.parts.objects:
+
+        add_empty(part_object.Name, part_objects_empty, part_object.Position, part_object.Rotation, part_object.Scale)
+
+    part_enemies_empty = add_empty("part_enemies", ob)
+
+    for part_enemy in data.parts.enemies:
+
+        add_empty(part_enemy.Name, part_enemies_empty, part_enemy.Position, part_enemy.Rotation, part_enemy.Scale)
+
+
+
 def build_flv(data, filename):
 
     bpy.ops.object.add(type="ARMATURE")
@@ -84,6 +111,7 @@ def build_flv(data, filename):
                 vertexList[last_vertex_count + j] = vertex
 
         faces = StripToTriangle(flv_mesh.vertex_indices, True)
+        #faces = StripToTriangle2(flv_mesh.vertex_indices, vertexList)
 
         # Set faces
         for j in range(0, len(flv_mesh.vertex_indices)):
@@ -103,6 +131,15 @@ def build_flv(data, filename):
                 for l in f.loops:
                     if l.vert.index >= last_vertex_count:
                         l[uv_layer1].uv = [flv_mesh.vertices.uvs[l.vert.index - last_vertex_count][0], 1 - flv_mesh.vertices.uvs[l.vert.index - last_vertex_count][1]]
+
+        if flv_mesh.vertices.colors != []:
+
+            color_name = "Color1Map"
+            color_layer = bm.loops.layers.color.get(color_name) or bm.loops.layers.color.new(color_name)
+            for f in bm.faces:
+                for l in f.loops:
+                    l[color_layer] = flv_mesh.vertices.colors[l.vert.index - last_vertex_count]
+
 
         bm.to_mesh(mesh)
         bm.free()
@@ -160,6 +197,10 @@ def main(filepath, files, clear_scene):
             msb = MSB1()
             br.endian = ">"
             msb.read(br)
+
+            file.close()
+
+            build_msb(msb, filename)
         
                 
 

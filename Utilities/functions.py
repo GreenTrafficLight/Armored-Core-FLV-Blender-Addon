@@ -1,3 +1,5 @@
+from mathutils import *
+
 def StripToTriangle(triangleStripList, reverse_face_winding = False):
     faces = []
     cte = 0
@@ -25,6 +27,43 @@ def StripToTriangle(triangleStripList, reverse_face_winding = False):
                     faces.append([a, b, c])
 
     return faces
+
+def StripToTriangle2(triangleStripList, vertexList):
+    faces = []
+    check_flip = False
+    flip = False
+    for i in range(len(triangleStripList) - 2):
+        a = triangleStripList[i]
+        b = triangleStripList[i + 1]
+        c = triangleStripList[i + 2]
+        if (a == 0xFFFF or b == 0xFFFF or c == 0xFFFF):
+            check_flip = True
+        elif (a != b and a != c and b != c):
+
+            if check_flip:
+                v1 = vertexList[a]
+                v2 = vertexList[b]
+                v3 = vertexList[c]
+                n1 = v1.normal
+                n2 = v2.normal
+                n3 = v3.normal
+                vertex_normal = ((n1 + n2 + n3) / 3).normalized()
+                face_normal = ((v3.co - v1.co).cross(v2.co - v1.co)).normalized()
+                if face_normal.length != 0 and vertex_normal.length != 0:
+                    angle = face_normal.dot(vertex_normal) / (face_normal.length * vertex_normal.length)
+                    flip = angle >= 0
+                check_flip = False
+            
+            if (flip == False):
+                faces.append([a,b,c])
+            else:
+                faces.append([c,b,a])
+
+            flip = not flip
+
+    return faces
+
+
 
 def ToTriangle(triangleList):
     faces = []

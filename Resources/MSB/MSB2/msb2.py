@@ -1,17 +1,20 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
+import math
+
 from mathutils import *
 
 class MSB1 :
 
     def __init__(self) -> None:
-        pass
+        self.models = None
+        self.parts = None
 
     def read(self, br):
 
-        models = MSB1.MODEL_PARAM()
-        models.read(br)
+        self.models = MSB1.MODEL_PARAM()
+        self.models.read(br)
         events = MSB1.EVENT_PARAM()
         events.read(br)
         regions = MSB1.POINT_PARAM()
@@ -20,9 +23,8 @@ class MSB1 :
         routes.read(br)
         layers = MSB1.LAYER_PARAM()
         layers.read(br)
-        parts = MSB1.PART_PRAM()
-        parts.read(br)
-        print("test")
+        self.parts = MSB1.PART_PRAM()
+        self.parts.read(br)
 
     class PARAM(ABC):
 
@@ -67,6 +69,10 @@ class MSB1 :
         @property
         def Name(self):
             return self._name
+
+        @Name.setter
+        def Name(self, value):
+            self._name = value
 
     class MODEL_TYPE(Enum):
 
@@ -136,30 +142,42 @@ class MSB1 :
         def Type(self):
             return self._type
 
+        @Type.setter
+        def Type(self, value):
+            self._type = value
+
         @property
         def Sib_Path(self):
             return self._sib_path
+
+        @Sib_Path.setter
+        def Sib_Path(self, value):
+            self._sib_path = value
 
         @property
         def Instance_Count(self):
             return self._instance_count
 
+        @Instance_Count.setter
+        def Instance_Count(self, value):
+            self._instance_count = value
+
         def read(self, br):
             start = br.tell()
             name_offset = br.readInt()
-            self._type = br.readInt()
+            self.Type = br.readInt()
             br.readInt()
             sib_offset = br.readInt()
-            self._instance_count = br.readInt()
+            self.Instance_Count = br.readInt()
             br.readInt()
             br.readInt()
             br.readInt()
 
             br.seek(start + name_offset)
-            self._name = br.readString()
+            self.Name = br.readString()
 
             br.seek(start + sib_offset)
-            self._sib_path = br.readString()
+            self.Sib_Path = br.readString()
 
     class EVENT_TYPE(Enum):
 
@@ -458,7 +476,7 @@ class MSB1 :
             self.Model_Index = br.readInt()
             sib_offset = br.readInt()
             self.Position = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
-            self.Rotation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
+            self.Rotation = Euler((math.radians(br.readFloat()), math.radians(br.readFloat()), math.radians(br.readFloat())), "XYZ")
             self.Scale = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.Draw_Groups = [br.readInt(), br.readInt(), br.readInt(), br.readInt()]
             self.Disp_Groups = [br.readInt(), br.readInt(), br.readInt(), br.readInt()]
@@ -466,7 +484,7 @@ class MSB1 :
             type_data_offset = br.readInt()
 
             br.seek(start + name_offset)
-            name = br.readString()
+            self.Name = br.readString()
 
             br.seek(start + sib_offset)
             self.Sib_Path = br.readString()
