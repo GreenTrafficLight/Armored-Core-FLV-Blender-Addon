@@ -1,4 +1,4 @@
-from ....Resources.FLVER.flver import *
+from ..flver import *
 from ....Utilities import *
 
 

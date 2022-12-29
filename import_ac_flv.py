@@ -44,22 +44,44 @@ def build_flv(data, filename):
     ob = bpy.context.object
     ob.name = str(filename)
 
-    amt = ob.data
-    amt.name = str(filename)
-
-    empty_list = []
+    armature = ob.data
+    armature.name = str(filename)
 
     mesh_index = 0
 
-    for bone in data.bones:
+    bone_mapping = []
 
-        empty = add_empty(bone.name, ob, bone.translation, bone.rotation, bone.scale)
+    for flver_bone in data.bones:
 
-        if bone.parent_index != -1:
+        bone_mapping.append(flver_bone.name)
 
-            empty.parent = empty_list[bone.parent_index]
+        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+        bone = armature.edit_bones.new(flver_bone.name)
 
-        empty_list.append(empty)
+        bone.head = (0 , 0, 0)
+        bone.tail = (0, 1, 0)
+        
+        bone.matrix = flver_bone.computeWorldTransform()
+
+        if flver_bone.parent_index != -1:
+
+            parent = data.bones[flver_bone.parent_index]
+
+            bone.parent = armature.edit_bones[parent.name]
+            bone.matrix = armature.edit_bones[parent.name].matrix @ bone.matrix
+
+    bones = armature.edit_bones
+    for flver_bone in data.bones:
+
+        bone = bones[flver_bone.name]
+
+        if flver_bone.parent_index != -1:
+
+            parent = data.bones[flver_bone.parent_index]
+            
+            #bone.head = bones[parent.name].tail
+
+    bpy.ops.object.mode_set(mode='OBJECT')
 
     for flv_mesh in data.meshes:
 
@@ -67,6 +89,9 @@ def build_flv(data, filename):
         obj = bpy.data.objects.new(str(mesh_index), mesh)
 
         bpy.context.collection.objects.link(obj)
+
+        modifier = obj.modifiers.new(armature.name, type="ARMATURE")
+        modifier.object = ob
 
         obj.parent = ob
 
@@ -84,8 +109,11 @@ def build_flv(data, filename):
 
             if bone_indice != 65535:
 
-                bone_matrix = Matrix.Identity(4)
                 bone = data.bones[bone_indice]
+                if not bone.name in obj.vertex_groups:
+                     obj.vertex_groups.new(name=bone.name)
+
+                bone_matrix = Matrix.Identity(4)
                 while True:
                     bone_matrix = bone.computeWorldTransform() @ bone_matrix
                     if bone.parent_index == -1:
@@ -140,9 +168,16 @@ def build_flv(data, filename):
                 for l in f.loops:
                     l[color_layer] = flv_mesh.vertices.colors[l.vert.index - last_vertex_count]
 
-
         bm.to_mesh(mesh)
         bm.free()
+
+        for i in range(len(flv_mesh.vertices.positions)):
+            if flv_mesh.vertices.bone_indices != []:
+                vg_name = bone_mapping[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[i]]]
+                group = obj.vertex_groups[vg_name]
+                weight = 1.0
+                if weight > 0.0:
+                    group.add([i], weight, 'REPLACE')
 
         # Set normals
         mesh.use_auto_smooth = True
