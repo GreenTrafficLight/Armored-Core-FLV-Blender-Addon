@@ -68,6 +68,8 @@ class FLVER0_CLASS:
             material.read(br, self)
             self.materials.append(material)
 
+        print(br.tell())
+
         for i in range(bone_count):
             bone = FLVER_CLASS.BONE()
             bone.read(br, False)
@@ -97,12 +99,24 @@ class FLVER0_CLASS:
 
         def read(self, br, flv):
 
+            little_endian_layout = False
+
             name_offset = br.readInt()
             mtd_offset = br.readInt()
             textures_offset = br.readInt()
             layouts_offset = br.readInt()
             br.readInt()
             layout_header_offset = br.readInt() # to fix with little endian
+
+            """
+            if layout_header_offset < 0:
+                little_endian_layout = True
+                br.endian = "<"
+                br.seek(-4, 1)
+                layout_header_offset = br.readInt()
+                br.endian = ">"
+            """
+
             br.readInt()
             br.readInt()
 
@@ -133,6 +147,9 @@ class FLVER0_CLASS:
             br.seek(save_position_textures_offset)
 
             if layout_header_offset != 0:
+
+                #if little_endian_layout == True:
+                    #br.endian = "<"
                 
                 save_position_layout_header_offset = br.tell()
                 
@@ -146,13 +163,22 @@ class FLVER0_CLASS:
                     layout_offset = br.readInt()
                     
                     save_position_layout_offset = br.tell()
+
+                    #if little_endian_layout == True:
+                        #br.endian = ">"
                     
                     br.seek(layouts_offset)
                     layout = FLVER0_CLASS.BUFFER_LAYOUT()
                     layout.read(br)
                     self.layouts.append(layout)
+
+                    #if little_endian_layout == True:
+                        #br.endian = "<"
                     
                     br.seek(save_position_layout_offset)
+                
+                #if little_endian_layout == True:
+                    #br.endian = ">"
 
                 br.seek(save_position_layout_header_offset)
 

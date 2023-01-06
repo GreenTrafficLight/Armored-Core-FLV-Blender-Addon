@@ -26,15 +26,15 @@ class FLVER_CLASS:
 
         def read(self, br, version):
 
-            self.Position = Vector3.fromBytes(br.readBytes(12))
+            self.Position = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             if version == 0x20010:
                 self.Color = (br.readByte(), br.readByte(), br.readByte(), br.readByte())
             else:
                 self.Color = (br.readByte(), br.readByte(), br.readByte(), br.readByte())
-            self.Forward = Vector3.fromBytes(br.readBytes(12))
+            self.Forward = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.Reference_ID = br.readShort()
             self.Parent_bone_index = br.readShort()
-            self.Upward = Vector3.fromBytes(br.readBytes(12))
+            self.Upward = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.Attach_bone_index = br.readShort()
             self.Flag1 = br.readByte()
             self.Use_upward_vector = br.readByte() == 1
