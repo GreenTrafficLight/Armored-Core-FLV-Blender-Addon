@@ -205,6 +205,25 @@ def build_flv(data, filename):
 
 
 def build_ani(data, filename):
+    
+    """
+    armature_data = bpy.data.armatures.new(filename)
+    armature_obj = bpy.data.objects.new(filename, armature_data)
+    bpy.context.collection.objects.link(armature_obj)
+    bpy.context.view_layer.objects.active = armature_obj
+    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+
+    for flver_bone in data.bones:
+        
+        edit_bone = armature_obj.data.edit_bones.new(flver_bone.name)
+        edit_bone.use_connect = False
+        edit_bone.use_inherit_rotation = True
+        edit_bone.use_inherit_scale = True
+        edit_bone.use_local_location = True
+        edit_bone.head = (0,0,0)
+        edit_bone.tail = (0,0.05,0)
+        armature_obj.data.edit_bones.active = edit_bone
+    """
 
     bpy.ops.object.add(type="ARMATURE")
     ob = bpy.context.object
@@ -213,10 +232,7 @@ def build_ani(data, filename):
     armature = ob.data
     armature.name = str(filename)
 
-    mesh_index = 0
-
     bone_mapping = []
-
 
     for flver_bone in data.bones:
 
@@ -247,8 +263,27 @@ def build_ani(data, filename):
             parent = data.bones[flver_bone.parent_index]
             
             bone.tail = bones[parent.name].head
+        
+        bpy.ops.object.mode_set(mode='POSE')
+        
+        if flver_bone.keyframe_data != None:
+
+            bone_position = ob.pose.bones[flver_bone.name]
+
+            for keyframe_information in flver_bone.keyframe_data.keyframe_informations:
+                
+                bone_position.rotation_mode = "XYZ"
+                bone_position.rotation_euler = data.rotations[keyframe_information.rotation_index]
+                bone_position.keyframe_insert(data_path="rotation_euler", frame=keyframe_information.time_rotation)
+                #bone_position.location = data.translations[keyframe_information.translation_index]
+                #bone_position.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
+        
+        bpy.ops.object.mode_set(mode='EDIT')
+
 
     bpy.ops.object.mode_set(mode='OBJECT')
+
+    ob.animation_data.action.name = filename
 
     ob.rotation_euler = ( radians(90), 0, 0 )
 

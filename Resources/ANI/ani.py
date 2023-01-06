@@ -33,7 +33,7 @@ class ANI_CLASS:
 
         br.seek(rotations_data_offset)
         for i in range(rotation_count):
-            self.rotations.append(Euler((br.readFloat(), br.readFloat(), br.readFloat()), "XYZ"))
+            self.rotations.append(Euler(((br.readUShort() - 32767) / 32767, (br.readUShort() - 32767) / 32767, (br.readUShort() - 32767) / 32767), "XYZ"))
 
     class BONE:
 
