@@ -37,7 +37,6 @@ def build_msb(data, filename):
         add_empty(part_enemy.Name, part_enemies_empty, part_enemy.Position, part_enemy.Rotation, part_enemy.Scale)
 
 
-
 def build_flv(data, filename):
 
     bpy.ops.object.add(type="ARMATURE")
@@ -51,6 +50,7 @@ def build_flv(data, filename):
 
     bone_mapping = []
 
+
     for flver_bone in data.bones:
 
         bone_mapping.append(flver_bone.name)
@@ -58,8 +58,8 @@ def build_flv(data, filename):
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
         bone = armature.edit_bones.new(flver_bone.name)
 
-        bone.head = (0 , 0, 0)
-        bone.tail = (0, 1, 0)
+        bone.head = (0, 0, 0)
+        bone.tail = (0, 0, 1)
         
         bone.matrix = flver_bone.computeWorldTransform()
 
@@ -79,7 +79,7 @@ def build_flv(data, filename):
 
             parent = data.bones[flver_bone.parent_index]
             
-            #bone.head = bones[parent.name].tail
+            bone.tail = bones[parent.name].head
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -179,6 +179,8 @@ def build_flv(data, filename):
                 if weight > 0.0:
                     group.add([i], weight, 'REPLACE')
 
+
+
         # Set normals
         mesh.use_auto_smooth = True
 
@@ -201,6 +203,54 @@ def build_flv(data, filename):
 
     ob.rotation_euler = ( radians(90), 0, 0 )
 
+
+def build_ani(data, filename):
+
+    bpy.ops.object.add(type="ARMATURE")
+    ob = bpy.context.object
+    ob.name = str(filename)
+
+    armature = ob.data
+    armature.name = str(filename)
+
+    mesh_index = 0
+
+    bone_mapping = []
+
+
+    for flver_bone in data.bones:
+
+        bone_mapping.append(flver_bone.name)
+
+        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+        bone = armature.edit_bones.new(flver_bone.name)
+
+        bone.head = (0, 0, 0)
+        bone.tail = (0, 0, 1)
+        
+        bone.matrix = flver_bone.computeWorldTransform()
+
+        if flver_bone.parent_index != -1:
+
+            parent = data.bones[flver_bone.parent_index]
+
+            bone.parent = armature.edit_bones[parent.name]
+            bone.matrix = armature.edit_bones[parent.name].matrix @ bone.matrix
+
+    bones = armature.edit_bones
+    for flver_bone in data.bones:
+
+        bone = bones[flver_bone.name]
+
+        if flver_bone.parent_index != -1:
+
+            parent = data.bones[flver_bone.parent_index]
+            
+            bone.tail = bones[parent.name].head
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+    ob.rotation_euler = ( radians(90), 0, 0 )
 
 def main(filepath, files, clear_scene):
     if clear_scene:
@@ -236,6 +286,16 @@ def main(filepath, files, clear_scene):
             file.close()
 
             build_msb(msb, filename)
+
+        elif file_extension == ".ani":
+
+            ani = ANI_CLASS()
+            br.endian = ">"
+            ani.read(br)
+
+            file.close()
+
+            build_ani(ani, filename)
         
                 
 
