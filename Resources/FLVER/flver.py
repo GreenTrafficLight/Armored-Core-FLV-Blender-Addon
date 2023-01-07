@@ -78,7 +78,7 @@ class FLVER_CLASS:
             self.name = br.readString()
             br.seek(save_position)
 
-        def computeWorldTransform(self):
+        def compute_world_transform(self):
 
             return Matrix.Translation(self.translation) @ self.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
 

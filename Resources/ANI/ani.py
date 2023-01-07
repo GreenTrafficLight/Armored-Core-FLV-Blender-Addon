@@ -33,7 +33,15 @@ class ANI_CLASS:
 
         br.seek(rotations_data_offset)
         for i in range(rotation_count):
-            self.rotations.append(Euler(((br.readUShort() - 32767) / 32767, (br.readUShort() - 32767) / 32767, (br.readUShort() - 32767) / 32767), "XYZ"))
+            self.rotations.append(Euler((self.decode_rotation_short(br.readUShort()), self.decode_rotation_short(br.readUShort()), self.decode_rotation_short(br.readUShort())), "XYZ"))
+
+    def decode_rotation_short(self, value):
+        decoded_value = -((value - 32767) / 32767)
+        if decoded_value >= 1:
+            decoded_value -= 1
+        return decoded_value
+
+
 
     class BONE:
 
@@ -69,7 +77,7 @@ class ANI_CLASS:
                 keyframe.read(br)
                 self.keyframe_data = keyframe
     
-        def computeWorldTransform(self):
+        def compute_world_transform(self):
 
             return Matrix.Translation(self.translation) @ self.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
 
