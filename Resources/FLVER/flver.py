@@ -161,6 +161,7 @@ class FLVER_CLASS:
             self.tangents = []
             self.bitangents = []
             self.colors = []
+            self.unknowns = []
 
         def read(self, br, layout, uv_factor, vertex_count):
 
@@ -222,6 +223,14 @@ class FLVER_CLASS:
                         for i in range(vertex_count):
                             br.seek(save_position + layout.size * i + position)
                             self.bone_indices.append([br.readUByte(), br.readUByte(), br.readUByte(), br.readUByte()])
+
+                        position += 4
+
+                    elif (member.type == FLVER_CLASS.LAYOUT_MEMBER.TYPE.short2_to_float2):
+
+                        for i in range(vertex_count):
+                            br.seek(save_position + layout.size * i + position)     
+                            self.unknowns.append([br.readUByte(), br.readUByte(), br.readUByte(), br.readUByte()])
 
                         position += 4
 

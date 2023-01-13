@@ -33,7 +33,7 @@ class ANI_CLASS:
 
         br.seek(rotations_data_offset)
         for i in range(rotation_count):
-            self.rotations.append(Euler((self.decode_rotation_short(br.readUShort()), self.decode_rotation_short(br.readUShort()), self.decode_rotation_short(br.readUShort())), "XYZ"))
+            self.rotations.append(Euler((br.readShort() / 1000, br.readShort() / 1000, br.readShort() / 1000), "XYZ"))
 
     def decode_rotation_short(self, value):
         decoded_value = -((value - 32767) / 32767)
@@ -96,12 +96,15 @@ class ANI_CLASS:
                 version = br.readUInt()
                 self.bounding_box_min = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
                 self.bounding_box_max = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
+                br.seek(keyframes_information_offset)
                 for i in range(keyframe_information_count):
                     keyframe_information = ANI_CLASS.BONE.KEYFRAME.INFORMATION()
                     if version == 1:
-                        br.readUShort()
-                        br.readUShort()
-                        br.readUShort()
+                        keyframe_information.time_translation = keyframe_information.time_rotation = br.readUShort() # time
+                        keyframe_information.translation_index = br.readUByte() # translation index ?
+                        br.readUByte() 
+                        br.readUByte() 
+                        keyframe_information.rotation_index = br.readUByte()  # rotation index ?
                         br.readUShort()
                     elif version == 2:
                         keyframe_information.time_translation = br.readUShort()

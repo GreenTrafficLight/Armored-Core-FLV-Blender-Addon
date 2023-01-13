@@ -59,7 +59,7 @@ def build_flv(data, filename):
         bone = armature.edit_bones.new(flver_bone.name)
 
         bone.head = (0, 0, 0)
-        bone.tail = (0, 0, 1)
+        bone.tail = (0, 0, 0.1)
         
         bone.matrix = flver_bone.compute_world_transform()
 
@@ -69,10 +69,8 @@ def build_flv(data, filename):
 
             bone.parent = armature.edit_bones[parent.name]
             bone.matrix = armature.edit_bones[parent.name].matrix @ bone.matrix
-            if flver_bone.name == "l_momo":
-                bone.matrix @= Quaternion((0.8820, 0.4712, 0.0000, 0.0000)).to_matrix().to_4x4()
-                print(bone.matrix.to_quaternion() @ Quaternion((0.8820, 0.4712, 0.0000, 0.0000)))
 
+    """
     bones = armature.edit_bones
     for flver_bone in data.bones:
 
@@ -83,6 +81,7 @@ def build_flv(data, filename):
             parent = data.bones[flver_bone.parent_index]
             
             bone.tail = bones[parent.name].head
+    """
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -236,10 +235,8 @@ def build_ani(data, filename):
                 parent = data.bones[flver_bone.parent_index]
                 bone.parent = armature.edit_bones[parent.name]
                 bone.matrix = armature.edit_bones[parent.name].matrix @ bone.matrix
-                if flver_bone.name == "l_momo":
-                    #bone.matrix @= Quaternion((0.8820, 0.4712, 0.0000, 0.0000)).to_matrix().to_4x4()
-                    print(bone.matrix.to_quaternion() @ Quaternion((0.8820, 0.4712, 0.0000, 0.0000)))
 
+        """
         for flver_bone in data.bones:
 
             bone = bones[flver_bone.name]
@@ -249,6 +246,10 @@ def build_ani(data, filename):
                 parent = data.bones[flver_bone.parent_index]
                 
                 bone.tail = bones[parent.name].head
+
+            if flver_bone.name == "l_momo":
+                print(bone.matrix.to_quaternion())
+        """
 
     bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
@@ -264,71 +265,19 @@ def build_ani(data, filename):
 
             bone_position = ob.pose.bones[flver_bone.name]
             ob_bone = ob.data.bones[flver_bone.name]
-
-            parentChildMatrix = flver_bone.compute_world_transform()
             
-            if flver_bone.parent_index != -1:
-                parent = data.bones[flver_bone.parent_index]
-                parentChildMatrix = parent.compute_world_transform() @ parentChildMatrix
-                if flver_bone.name == "l_momo":
-                    #parentChildMatrix @= Quaternion((0.8820, 0.4712, 0.0000, 0.0000)).to_matrix().to_4x4()
-                    print(bone.matrix.to_quaternion() @ Quaternion((0.8820, 0.4712, 0.0000, 0.0000)))
-
-            startRot = parentChildMatrix.to_quaternion()
-
             for keyframe_information in flver_bone.keyframe_data.keyframe_informations:
                 
-                #print(data.rotations[keyframe_information.rotation_index].to_quaternion())
-                
-                if index <= 0:
-                    bone_position.rotation_quaternion =  startRot @ data.rotations[keyframe_information.rotation_index].to_quaternion() 
+                if index <= 1002:
+                    #bone_position.location = data.translations[keyframe_information.translation_index]
+                    #bone_position.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
+                    bone_position.rotation_quaternion = data.rotations[keyframe_information.rotation_index].to_quaternion()
                     bone_position.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
-
-                #bone_position.rotation_mode = "XYZ"
-                #bone_position.rotation_euler = data.rotations[keyframe_information.rotation_index]
-                #bone_position.rotation_euler.rotate_axis("X", data.rotations[keyframe_information.rotation_index][0])
-                #bone_position.keyframe_insert(data_path="rotation_euler", frame=keyframe_information.time_rotation)
 
             index += 1
         
         bpy.ops.object.mode_set(mode='EDIT')
 
-    """
-    bones = armature.edit_bones
-    for flver_bone in data.bones:
-
-        bone = bones[flver_bone.name]
-
-        if flver_bone.parent_index != -1:
-
-            parent = data.bones[flver_bone.parent_index]
-            
-            bone.tail = bones[parent.name].head
-
-        bpy.ops.object.mode_set(mode='POSE')
-        
-        if flver_bone.keyframe_data != None:
-
-            bone_position = ob.pose.bones[flver_bone.name]
-            ob_bone = ob.data.bones[flver_bone.name]
-
-            if bone.parent:
-                parentChildMatrix =  ob_bone.parent.matrix_local.inverted() @ ob_bone.matrix_local
-            else:
-                parentChildMatrix = ob_bone.matrix_local
-
-            startRot = parentChildMatrix.to_quaternion()
-            startEuler = parentChildMatrix.to_euler()
-
-            for keyframe_information in flver_bone.keyframe_data.keyframe_informations:
-                
-                #bone_position.rotation_quaternion = data.rotations[keyframe_information.rotation_index].to_quaternion()
-                bone_position.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
-                #bone_position.location = data.translations[keyframe_information.translation_index]
-                #bone_position.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
-        
-        bpy.ops.object.mode_set(mode='EDIT')
-    """
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
