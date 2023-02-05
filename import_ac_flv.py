@@ -49,8 +49,7 @@ def build_flv(data, filename):
     mesh_index = 0
 
     bone_mapping = []
-
-
+        
     for flver_bone in data.bones:
 
         bone_mapping.append(flver_bone.name)
@@ -69,19 +68,6 @@ def build_flv(data, filename):
 
             bone.parent = armature.edit_bones[parent.name]
             bone.matrix = armature.edit_bones[parent.name].matrix @ bone.matrix
-
-    """
-    bones = armature.edit_bones
-    for flver_bone in data.bones:
-
-        bone = bones[flver_bone.name]
-
-        if flver_bone.parent_index != -1:
-
-            parent = data.bones[flver_bone.parent_index]
-            
-            bone.tail = bones[parent.name].head
-    """
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -126,11 +112,14 @@ def build_flv(data, filename):
         # Set vertices
         for j in range(len(flv_mesh.vertices.positions)):
 
+                """
                 if flv_mesh.vertices.bone_indices != []:
                     transformation =  matrices[flv_mesh.vertices.bone_indices[j]] @ Matrix.Translation(flv_mesh.vertices.positions[j])
                     vertex = bm.verts.new(transformation.translation)
                 else:
                     vertex = bm.verts.new(flv_mesh.vertices.positions[j])
+                """
+                vertex = bm.verts.new(flv_mesh.vertices.positions[j])
 
                 if flv_mesh.vertices.normals != []:
                     vertex.normal = flv_mesh.vertices.normals[j]
@@ -202,6 +191,58 @@ def build_flv(data, filename):
 
         last_vertex_count += len(flv_mesh.vertices.positions)
         mesh_index += 1
+   
+    """
+    bpy.ops.object.mode_set(mode="EDIT")
+    
+    for obj in bpy.data.objects:
+        if obj.parent == ob and obj.type == "MESH":
+            for vertex_group in obj.vertex_groups:
+                for v in obj.data.vertices:
+                    vs = [ v for v in obj.data.vertices if vertex_group.index in [ vg.group for vg in v.groups ] ]
+    """
+
+    """
+    bpy.ops.object.mode_set(mode="POSE")
+
+    for flver_bone in data.bones:
+
+        p_bone = ob.pose.bones[flver_bone.name]
+
+        p_bone.matrix_basis = flver_bone.compute_world_transform2()
+
+        print(p_bone.matrix_basis.translation)
+
+        if flver_bone.parent_index != -1:
+
+            parent = data.bones[flver_bone.parent_index]
+
+            p_bone.matrix_basis = ob.pose.bones[parent.name].matrix_basis @ p_bone.matrix_basis
+    """
+
+    
+    """
+    bpy.ops.object.mode_set(mode="EDIT")
+
+    
+    for flver_bone in data.bones:
+
+        p_bone = armature.edit_bones[flver_bone.name]
+
+        p_bone.matrix = flver_bone.compute_world_transform()
+
+        print(p_bone.matrix.translation)
+
+        if flver_bone.parent_index != -1:
+
+            parent = data.bones[flver_bone.parent_index]
+
+            p_bone.matrix = armature.edit_bones[parent.name].matrix @ p_bone.matrix
+    """
+    
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+    
 
     ob.rotation_euler = ( radians(90), 0, 0 )
 
@@ -224,32 +265,18 @@ def build_ani(data, filename):
 
             bpy.ops.object.mode_set(mode='EDIT', toggle=False)
             bone = armature.edit_bones.new(flver_bone.name)
+
             bone.head = (0, 0, 0)
             bone.tail = (0, 0, 0.1)
-
-        bones = armature.edit_bones
-        for flver_bone in data.bones:
-            bone = bones[flver_bone.name]
+            
             bone.matrix = flver_bone.compute_world_transform()
+
             if flver_bone.parent_index != -1:
+
                 parent = data.bones[flver_bone.parent_index]
+
                 bone.parent = armature.edit_bones[parent.name]
                 bone.matrix = armature.edit_bones[parent.name].matrix @ bone.matrix
-
-        """
-        for flver_bone in data.bones:
-
-            bone = bones[flver_bone.name]
-
-            if flver_bone.parent_index != -1:
-
-                parent = data.bones[flver_bone.parent_index]
-                
-                bone.tail = bones[parent.name].head
-
-            if flver_bone.name == "l_momo":
-                print(bone.matrix.to_quaternion())
-        """
 
     bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
@@ -267,12 +294,12 @@ def build_ani(data, filename):
             ob_bone = ob.data.bones[flver_bone.name]
             
             for keyframe_information in flver_bone.keyframe_data.keyframe_informations:
-                
-                if index <= 1002:
-                    #bone_position.location = data.translations[keyframe_information.translation_index]
-                    #bone_position.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
-                    bone_position.rotation_quaternion = data.rotations[keyframe_information.rotation_index].to_quaternion()
-                    bone_position.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
+
+                pass
+                bone_position.location = data.translations[keyframe_information.translation_index]
+                bone_position.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
+                bone_position.rotation_quaternion = data.rotations[keyframe_information.rotation_index].to_quaternion()
+                bone_position.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
 
             index += 1
         

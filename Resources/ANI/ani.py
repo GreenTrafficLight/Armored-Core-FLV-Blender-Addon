@@ -35,14 +35,6 @@ class ANI_CLASS:
         for i in range(rotation_count):
             self.rotations.append(Euler((br.readShort() / 1000, br.readShort() / 1000, br.readShort() / 1000), "XYZ"))
 
-    def decode_rotation_short(self, value):
-        decoded_value = -((value - 32767) / 32767)
-        if decoded_value >= 1:
-            decoded_value -= 1
-        return decoded_value
-
-
-
     class BONE:
 
         def __init__(self) -> None:
@@ -100,23 +92,28 @@ class ANI_CLASS:
                 for i in range(keyframe_information_count):
                     keyframe_information = ANI_CLASS.BONE.KEYFRAME.INFORMATION()
                     if version == 1:
-                        keyframe_information.time_translation = keyframe_information.time_rotation = br.readUShort() # time
-                        keyframe_information.translation_index = br.readUByte() # translation index ?
-                        br.readUByte() 
-                        br.readUByte() 
-                        keyframe_information.rotation_index = br.readUByte()  # rotation index ?
-                        br.readUShort()
+                        keyframe_information.time_translation = keyframe_information.time_rotation = br.readShort() # time
+                        keyframe_information.translation_index = br.readByte() # translation index ?
+                        br.readByte() 
+                        br.readByte() 
+                        keyframe_information.rotation_index = br.readByte()  # rotation index ?
+                        br.readShort()
                     elif version == 2:
-                        keyframe_information.time_translation = br.readUShort()
-                        keyframe_information.translation_index = br.readUShort()
-                        keyframe_information.time_rotation = br.readUShort()
-                        keyframe_information.rotation_index = br.readUShort()
-                        br.seek(8, 1)
+                        # add rotation
+                        keyframe_information.time_translation = keyframe_information.time_rotation = br.readShort()
+                        br.readShort()
+                        br.readShort()
+                        keyframe_information.translation_index = br.readShort()
+
+                        keyframe_information.rotation_index = br.readShort()
+                        br.readShort()
+                        br.readShort()
+                        br.readShort()
                     elif version == 4:
-                        keyframe_information.time_translation = br.readUShort()
-                        keyframe_information.translation_index = br.readUShort()
-                        keyframe_information.time_rotation = br.readUShort()
-                        keyframe_information.rotation_index = br.readUShort()
+                        keyframe_information.time_rotation = br.readShort()
+                        keyframe_information.rotation_index = br.readShort()
+                        keyframe_information.time_translation = br.readShort()
+                        keyframe_information.translation_index = br.readShort()
                     else:
                         print("Unknown version")
 

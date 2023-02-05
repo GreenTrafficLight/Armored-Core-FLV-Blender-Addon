@@ -82,6 +82,10 @@ class FLVER_CLASS:
 
             return Matrix.Translation(self.translation) @ self.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
 
+        def compute_world_transform2(self):
+
+            return Matrix.Translation((self.translation[0], self.translation[2], -self.translation[1])) @ self.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
+
     class LAYOUT_MEMBER :
 
         def __init__(self) -> None:
