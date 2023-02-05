@@ -119,6 +119,7 @@ def build_flv(data, filename):
                 else:
                     vertex = bm.verts.new(flv_mesh.vertices.positions[j])
                 """
+                
                 vertex = bm.verts.new(flv_mesh.vertices.positions[j])
 
                 if flv_mesh.vertices.normals != []:
@@ -130,7 +131,6 @@ def build_flv(data, filename):
                 vertexList[last_vertex_count + j] = vertex
 
         faces = StripToTriangle(flv_mesh.vertex_indices, True)
-        #faces = StripToTriangle2(flv_mesh.vertex_indices, vertexList)
 
         # Set faces
         for j in range(0, len(flv_mesh.vertex_indices)):
@@ -170,8 +170,6 @@ def build_flv(data, filename):
                 if weight > 0.0:
                     group.add([i], weight, 'REPLACE')
 
-
-
         # Set normals
         mesh.use_auto_smooth = True
 
@@ -191,18 +189,7 @@ def build_flv(data, filename):
 
         last_vertex_count += len(flv_mesh.vertices.positions)
         mesh_index += 1
-   
-    """
-    bpy.ops.object.mode_set(mode="EDIT")
-    
-    for obj in bpy.data.objects:
-        if obj.parent == ob and obj.type == "MESH":
-            for vertex_group in obj.vertex_groups:
-                for v in obj.data.vertices:
-                    vs = [ v for v in obj.data.vertices if vertex_group.index in [ vg.group for vg in v.groups ] ]
-    """
 
-    
     bpy.ops.object.mode_set(mode="POSE")
 
     for flver_bone in data.bones:
@@ -218,34 +205,10 @@ def build_flv(data, filename):
         else:
             
             p_bone.matrix_basis = p_bone.bone.matrix_local.inverted() @ flver_bone.compute_world_transform2()
-
-    
-
-    
-    """
-    bpy.ops.object.mode_set(mode="EDIT")
-
-    
-    for flver_bone in data.bones:
-
-        p_bone = armature.edit_bones[flver_bone.name]
-
-        p_bone.matrix = flver_bone.compute_world_transform()
-
-        print(p_bone.matrix.translation)
-
-        if flver_bone.parent_index != -1:
-
-            parent = data.bones[flver_bone.parent_index]
-
-            p_bone.matrix = armature.edit_bones[parent.name].matrix @ p_bone.matrix
-    """
-    
-
+   
     bpy.ops.object.mode_set(mode='OBJECT')
-    
 
-    ob.rotation_euler = ( radians(-180), 0, 0 )
+    ob.rotation_euler = ( radians(90), 0, 0 )
 
 
 def build_ani(data, filename):
@@ -281,7 +244,6 @@ def build_ani(data, filename):
 
     bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
-    
     bones = armature.edit_bones
     index = 0
     """
@@ -289,28 +251,36 @@ def build_ani(data, filename):
         
         if flver_bone.keyframe_data != None:
 
-            bone = bones[flver_bone.name]
-
             bpy.ops.object.mode_set(mode='POSE')
 
-            bone_position = ob.pose.bones[flver_bone.name]
+            p_bone = ob.pose.bones[flver_bone.name]
 
-            parentChildMatrix = bone_position.matrix_basis
+            if flver_bone.parent_index != -1:
+
+                p_bone.matrix_basis =  p_bone.bone.matrix_local.inverted() @ p_bone.bone.parent.matrix_local @ flver_bone.compute_world_transform()
+
+            else:
+                
+                p_bone.matrix_basis = p_bone.bone.matrix_local.inverted() @ flver_bone.compute_world_transform()
         
             for keyframe_information in flver_bone.keyframe_data.keyframe_informations:
-
-                pass
+                
                 translation = data.translations[keyframe_information.translation_index]
-                bone_position.location = parentChildMatrix @ Vector((translation[0], translation[2], -translation[1]))
-                bone_position.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
-                rotation = data.rotations[keyframe_information.rotation_index]
-                #bone_position.rotation_quaternion = parentChildMatrix.to_quaternion() @ Euler((rotation[0], rotation[2], -rotation[1])).to_quaternion()
-                #bone_position.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
+                print(p_bone.bone.matrix_local.inverted())
+                print(p_bone.bone.matrix_local.inverted() @ translation)
+                p_bone.location = translation
+                p_bone.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
 
+                rotation = data.rotations[keyframe_information.rotation_index]
+                print(p_bone.bone.matrix_local.inverted().to_quaternion() @ rotation.to_quaternion())
+                p_bone.rotation_quaternion = p_bone.bone.matrix_local.inverted().to_quaternion() @ rotation.to_quaternion()
+                p_bone.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
+                
             index += 1
         
         bpy.ops.object.mode_set(mode='EDIT')
     """
+
     for flver_bone in data.bones:
         
         if flver_bone.keyframe_data != None:
@@ -339,16 +309,15 @@ def build_ani(data, filename):
                 p_bone.rotation_quaternion = Euler((rotation[0], rotation[2], -rotation[1])).to_quaternion()  
                 p_bone.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
                 
-
             index += 1
         
         bpy.ops.object.mode_set(mode='EDIT')
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
-    ob.animation_data.action.name = filename
-
     ob.rotation_euler = ( radians(90), 0, 0 )
+
+    ob.animation_data.action.name = filename
 
 def main(filepath, files, clear_scene):
     if clear_scene:
