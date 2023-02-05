@@ -73,6 +73,10 @@ class ANI_CLASS:
 
             return Matrix.Translation(self.translation) @ self.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
 
+        def compute_world_transform2(self):
+
+            return Matrix.Translation((self.translation[0], self.translation[2], -self.translation[1])) @ Euler((self.rotation[0], self.rotation[2], -self.rotation[1])).to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
+
         class KEYFRAME:
             
             def __init__(self) -> None:

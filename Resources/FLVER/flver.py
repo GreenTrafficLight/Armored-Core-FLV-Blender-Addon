@@ -84,7 +84,7 @@ class FLVER_CLASS:
 
         def compute_world_transform2(self):
 
-            return Matrix.Translation((self.translation[0], self.translation[2], -self.translation[1])) @ self.rotation.to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
+            return Matrix.Translation((self.translation[0], self.translation[2], -self.translation[1])) @ Euler((self.rotation[0], self.rotation[2], -self.rotation[1])).to_matrix().to_4x4() @ Matrix.Scale(1, 4, self.scale)
 
     class LAYOUT_MEMBER :
 
