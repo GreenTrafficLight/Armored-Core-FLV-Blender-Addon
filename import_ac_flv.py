@@ -332,14 +332,13 @@ def build_ani(data, filename):
             for keyframe_information in flver_bone.keyframe_data.keyframe_informations:
 
                 pass
-                """
                 translation = data.translations[keyframe_information.translation_index]
-                p_bone.location = Vector((translation[0], translation[2], -translation[1])) @ p_bone.matrix_basis 
+                p_bone.location = p_bone.matrix_basis @ Vector((translation[0], translation[2], -translation[1]))
                 p_bone.keyframe_insert(data_path="location", frame=keyframe_information.time_translation)
                 rotation = data.rotations[keyframe_information.rotation_index]
-                p_bone.rotation_quaternion = Euler((rotation[0], rotation[2], -rotation[1])).to_quaternion() @ p_bone.matrix_basis.to_quaternion() 
+                p_bone.rotation_quaternion = Euler((rotation[0], rotation[2], -rotation[1])).to_quaternion()  
                 p_bone.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time_rotation)
-                """
+                
 
             index += 1
         
@@ -349,7 +348,7 @@ def build_ani(data, filename):
 
     ob.animation_data.action.name = filename
 
-    ob.rotation_euler = ( radians(-180), 0, 0 )
+    ob.rotation_euler = ( radians(90), 0, 0 )
 
 def main(filepath, files, clear_scene):
     if clear_scene:
