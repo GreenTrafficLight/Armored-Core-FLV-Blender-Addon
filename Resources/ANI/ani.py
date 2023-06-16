@@ -7,12 +7,13 @@ class ANI_CLASS:
         self.bones = []
         self.translations = []
         self.rotations = []
+        self.max_frame_count = 0
 
     def read(self, br):
 
         header = br.readUInt()
         br.readUInt()
-        max_frame_count = br.readUInt()
+        self.max_frame_count = br.readUInt()
         bones_data_offset = br.readUInt()
         bone_count = br.readUInt()
         translations_data_offset = br.readUInt()
@@ -64,10 +65,12 @@ class ANI_CLASS:
             print(br.tell())
             keyframe_data_offset = br.readUInt()
             if keyframe_data_offset != 0:
+                print(self.name)
                 br.seek(keyframe_data_offset)
                 keyframe = ANI_CLASS.BONE.KEYFRAME()
                 keyframe.read(br)
                 self.keyframe_data = keyframe
+                print("\n")
     
         def compute_world_transform(self):
 
@@ -95,6 +98,7 @@ class ANI_CLASS:
                 br.seek(keyframes_information_offset)
                 for i in range(keyframe_information_count):
                     keyframe_information = ANI_CLASS.BONE.KEYFRAME.INFORMATION()
+                    print(version)
                     if version == 1:
                         keyframe_information.time_translation = keyframe_information.time_rotation = br.readShort() # time
                         keyframe_information.translation_index = br.readByte() # translation index ?
@@ -120,14 +124,14 @@ class ANI_CLASS:
                         keyframe_information.translation_index = br.readShort()
                     else:
                         print("Unknown version")
-
+                    
                     self.keyframe_informations.append(keyframe_information)
 
             class INFORMATION:
 
                 def __init__(self) -> None:
                     self.time_translation = 0
-                    self.translation_index = 0
+                    self.translation_index = -1
                     self.time_rotation= 0
-                    self.rotation_index = 0
+                    self.rotation_index = -1
 
