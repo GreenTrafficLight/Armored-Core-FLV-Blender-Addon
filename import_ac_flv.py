@@ -230,11 +230,14 @@ def build_ani(data, filename):
 
     print("--ANIMATION--")
 
+    bpy.ops.object.mode_set(mode='POSE')
+
     for flver_bone in data.bones:
 
-        print(flver_bone.name)
+        if flver_bone.name not in ob.pose.bones:
+            continue
 
-        bpy.ops.object.mode_set(mode='POSE')
+        print(flver_bone.name)
 
         p_bone = ob.pose.bones[flver_bone.name]
         bone = ob.data.bones[flver_bone.name]
@@ -261,11 +264,7 @@ def build_ani(data, filename):
                     rotation = data.rotations[keyframe_information.rotation_index]
                     
                     p_bone.rotation_quaternion = parentChildMatrix.to_quaternion() @ rotation.to_quaternion()
-                    p_bone.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time)
-        
-        
-        bpy.ops.object.mode_set(mode='EDIT')
-    
+                    p_bone.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time)    
     
     bpy.ops.object.mode_set(mode='OBJECT')
     
