@@ -59,6 +59,12 @@ class BinaryReader:
     def readFloat(self):
         return struct.unpack(self.endian + "f", self.read(4))[0]
 
+    def read_floats(self, n):
+        floats = []
+        for i in range(n):
+            floats.append(self.readFloat())
+        return floats
+
     def readHalfFloat(self):
         return float(np.frombuffer(self.read(2), dtype="<e")[0])
 
