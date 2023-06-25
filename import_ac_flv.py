@@ -238,6 +238,8 @@ def build_ani(data, filename):
             continue
 
         print(flver_bone.name)
+        if flver_bone.name == "LTF7":
+            print("test")
 
         p_bone = ob.pose.bones[flver_bone.name]
         bone = ob.data.bones[flver_bone.name]
@@ -262,6 +264,10 @@ def build_ani(data, filename):
 
                 if keyframe_information.rotation_index != -1:
                     rotation = data.rotations[keyframe_information.rotation_index]
+                    # print(flver_bone.rotation.to_quaternion())
+                    # print(parentChildMatrix.to_quaternion())
+                    # print(rotation.to_quaternion())
+                    # print(parentChildMatrix.to_quaternion() @ rotation.to_quaternion())
                     
                     p_bone.rotation_quaternion = parentChildMatrix.to_quaternion() @ rotation.to_quaternion()
                     p_bone.keyframe_insert(data_path="rotation_quaternion", frame=keyframe_information.time)    

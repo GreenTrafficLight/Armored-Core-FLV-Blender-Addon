@@ -30,6 +30,8 @@ class Bone:
         keyframe_data_offset = br.readUInt()
         if keyframe_data_offset != 0:
             print(self.name)
+            if self.name == "LTF7":
+                print("test")
             br.seek(keyframe_data_offset)
             keyframe = Bone.KEYFRAME()
             keyframe.read(br)
@@ -59,7 +61,7 @@ class Bone:
             for i in range(keyframe_information_count):
                 keyframe_information = Bone.KEYFRAME.INFORMATION()
                 keyframe_information.time = br.readShort()
-                # print(version)
+                print(version)
                 if version == 1:
                     keyframe_information.translation_index = br.readUByte()
                     br.readUByte() 

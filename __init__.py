@@ -23,7 +23,7 @@ class ImportArmoredCoreFLV(Operator, ImportHelper):
     bl_label = "Import Armored Core FLV Data"
 
     filename_ext = ".flv;.msb;.ani"
-    filter_glob: StringProperty(default="*.flv;*.msb;*.ani", options={'HIDDEN'}, maxlen=255,)
+    filter_glob: StringProperty(default="*.flv;*.flver;*.msb;*.ani", options={'HIDDEN'}, maxlen=255,)
 
     # Selected files
     files: CollectionProperty(type=bpy.types.PropertyGroup)
