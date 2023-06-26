@@ -2,6 +2,7 @@ from ....Utilities import *
 
 from .Material import *
 
+from ..Bone import *
 from ..Dummy import *
 
 class FLVER2:
@@ -89,4 +90,9 @@ class FLVER2:
             material = Material()
             material.read(br, self, header, GX_lists, GX_list_indices)
             self.materials.append(material)
+
+        for i in range(bone_count):
+            bone = Bone()
+            bone.read(br, header.unicode)
+            self.bones.append(bone)
 
