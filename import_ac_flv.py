@@ -69,23 +69,23 @@ def build_flv(data, filename):
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
+    mesh = bpy.data.meshes.new(str("0"))
+    obj = bpy.data.objects.new(str("0"), mesh)
+
+    bpy.context.collection.objects.link(obj)
+
+    modifier = obj.modifiers.new(armature.name, type="ARMATURE")
+    modifier.object = ob
+
+    obj.parent = ob
+
+    vertexList = {}
+    facesList = []
+    normals = []
+
+    last_vertex_count = 0
+
     for mesh_index, flv_mesh in enumerate(data.meshes):
-
-        mesh = bpy.data.meshes.new(str(mesh_index))
-        obj = bpy.data.objects.new(str(mesh_index), mesh)
-
-        bpy.context.collection.objects.link(obj)
-
-        modifier = obj.modifiers.new(armature.name, type="ARMATURE")
-        modifier.object = ob
-
-        obj.parent = ob
-
-        vertexList = {}
-        facesList = []
-        normals = []
-
-        last_vertex_count = 0
 
         bm = bmesh.new()
         bm.from_mesh(mesh)
@@ -151,7 +151,8 @@ def build_flv(data, filename):
             color_layer = bm.loops.layers.color.get(color_name) or bm.loops.layers.color.new(color_name)
             for f in bm.faces:
                 for l in f.loops:
-                    l[color_layer] = flv_mesh.vertices.colors[l.vert.index - last_vertex_count]
+                    if l.vert.index >= last_vertex_count:
+                        l[color_layer] = flv_mesh.vertices.colors[l.vert.index - last_vertex_count]
 
         bm.to_mesh(mesh)
         bm.free()
