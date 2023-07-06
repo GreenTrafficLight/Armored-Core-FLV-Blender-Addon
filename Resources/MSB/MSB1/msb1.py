@@ -23,7 +23,7 @@ class MSB1 :
         routes.read(br)
         layers = MSB1.LAYER_PARAM()
         layers.read(br)
-        self.parts = MSB1.PART_PRAM()
+        self.parts = MSB1.PART_PARAM()
         self.parts.read(br)
 
     class PARAM(ABC):
@@ -246,7 +246,7 @@ class MSB1 :
         Dummy_Enemy = 10
         Connect_Collision = 11
 
-    class PART_PRAM(PARAM):
+    class PART_PARAM(PARAM):
 
         def __init__(self) -> None:
             super().__init__()

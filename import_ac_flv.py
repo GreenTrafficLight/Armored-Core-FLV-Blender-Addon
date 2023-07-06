@@ -163,7 +163,7 @@ def build_flv(data, filename):
                 group = obj.vertex_groups[vg_name]
                 weight = 1.0
                 if weight > 0.0:
-                    group.add([i], weight, 'REPLACE')
+                    group.add([i + last_vertex_count], weight, 'REPLACE')
 
         # Set normals
         mesh.use_auto_smooth = True
@@ -313,7 +313,7 @@ def main(filepath, files, clear_scene):
 
             file.close()
 
-            build_msb(msb, filename)
+            #build_msb(msb, filename)
 
         elif file_extension == ".ani":
 
