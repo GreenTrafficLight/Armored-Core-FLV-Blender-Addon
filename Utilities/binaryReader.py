@@ -72,20 +72,22 @@ class BinaryReader:
         return struct.unpack(self.endian + "d", self.read(8))[0]
 
 
-    def readString(self, encoding="utf-8"):
-        string = ""
+    def readString(self, encoding="utf-16"):
+        b_array = []
 
         while True:
             character = self.readChar()
-            if character == b"\x00":
+            if character == b"\x00" and encoding == "utf-8":
                 break
-            else:
-                try:
-                    string += str(character, encoding)
-                except:
-                    pass
+            elif character == b"\x00" and encoding == "utf-16":
+                if b_array != [] and b_array[-1] == b"\x00":
+                    break
 
-        return string
+            b_array.append(character)
+
+        string =  [item for item in b_array if item != b'\x00']
+
+        return b''.join(string).decode('utf-8')
 
     def bytesToString(self, byteArray, encoding="utf-8"):
         try:

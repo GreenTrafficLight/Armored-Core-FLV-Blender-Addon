@@ -15,6 +15,7 @@ class Vertices:
         self.bitangents = []
         self.colors = []
         self.unknowns = []
+        self.has_already_bone_indices = False
 
     def read(self, br, layout, uv_factor, vertex_count):
 
@@ -82,8 +83,9 @@ class Vertices:
                 elif (member.type == LayoutMember.LayoutType.short2_to_float2):
 
                     for i in range(vertex_count):
-                        br.seek(save_position + layout.size * i + position)     
-                        self.unknowns.append([br.readUByte(), br.readUByte(), br.readUByte(), br.readUByte()])
+                        br.seek(save_position + layout.size * i + position)
+                        [br.readUByte(), br.readUByte(), br.readUByte()]
+                        self.bone_indices.append(br.readUByte())
 
                     position += 4
 
@@ -94,6 +96,8 @@ class Vertices:
                         self.bone_indices.append([br.readUShort(), br.readUShort(), br.readUShort(), br.readUShort()])
 
                     position += 8
+                
+                self.has_already_bone_indices = True
 
             elif (member.semantic == LayoutMember.LayoutSemantic.NORMAL):
 
@@ -127,8 +131,11 @@ class Vertices:
                 elif (member.type == LayoutMember.LayoutType.short2_to_float2):
 
                     for i in range(vertex_count):
-                        br.seek(save_position + layout.size * i + position)     
-                        self.bone_indices.append(br.readUByte())
+                        br.seek(save_position + layout.size * i + position)
+                        if not self.has_already_bone_indices:     
+                            self.bone_indices.append(br.readUByte())
+                        else:
+                            w = br.readByte() / 127
                         z, y, x = br.readByte() / 127, br.readByte() / 127, br.readByte() / 127
                         self.normals.append(Vector((x, y, z)).normalized())
 

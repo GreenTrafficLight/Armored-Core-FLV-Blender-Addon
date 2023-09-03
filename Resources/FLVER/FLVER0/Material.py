@@ -40,7 +40,7 @@ class Material:
         save_position_textures_offset = br.tell()
 
         br.seek(name_offset)
-        self.name = br.readString()
+        #self.name = br.readString()
         br.seek(mtd_offset)
         self.mtd = br.readString()
 

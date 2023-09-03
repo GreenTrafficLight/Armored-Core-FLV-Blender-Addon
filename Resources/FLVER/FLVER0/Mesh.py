@@ -18,7 +18,7 @@ class Mesh:
         self.vertices = []
         self.layout_index = []
 
-    def read(self, br, flv, data_offset):
+    def read(self, br, flv_header, flv):
 
         self.dynamic = br.readByte()
         self.material_index = br.readByte()
@@ -41,14 +41,14 @@ class Mesh:
 
         save_position_vertex_indices_offset = br.tell()
 
-        br.seek(data_offset + vertex_indices_offset)
+        br.seek(flv_header.data_offset + vertex_indices_offset)
 
-        if flv.vertex_index_size == 16:
+        if flv_header.vertex_index_size == 16:
 
             for i in range(vertex_index_count):
                 self.vertex_indices.append(br.readUShort())
 
-        elif flv.vertex_index_size == 32:
+        elif flv_header.vertex_index_size == 32:
 
             for i in range(vertex_index_count):
                 self.vertex_indices.append(br.readUInt()) 
@@ -80,7 +80,7 @@ class Mesh:
 
         save_position_buffer_offset = br.tell()
 
-        br.seek(data_offset + buffer.buffer_offset)
+        br.seek(flv_header.data_offset + buffer.buffer_offset)
         self.layout_index = buffer.layout_index
         layout = flv.materials[self.material_index].layouts[self.layout_index]
 

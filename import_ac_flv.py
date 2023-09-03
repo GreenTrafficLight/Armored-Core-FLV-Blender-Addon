@@ -109,9 +109,8 @@ def build_flv(data, filename):
 
         # Set vertices
         for j in range(len(flv_mesh.vertices.positions)):
-
                 if flv_mesh.vertices.bone_indices != []:
-                    transformation =  matrices[flv_mesh.vertices.bone_indices[j]] @ Matrix.Translation(flv_mesh.vertices.positions[j])
+                    transformation =  matrices[flv_mesh.vertices.bone_indices[j][0]] @ Matrix.Translation(flv_mesh.vertices.positions[j])
                     vertex = bm.verts.new(transformation.translation)
                 else:
                     vertex = bm.verts.new(flv_mesh.vertices.positions[j])
@@ -155,10 +154,10 @@ def build_flv(data, filename):
 
         bm.to_mesh(mesh)
         bm.free()
-
+        
         for i in range(len(flv_mesh.vertices.positions)):
             if flv_mesh.vertices.bone_indices != []:
-                vg_name = bone_mapping[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[i]]]
+                vg_name = bone_mapping[flv_mesh.bone_indices[flv_mesh.vertices.bone_indices[i][0]]]
                 group = obj.vertex_groups[vg_name]
                 weight = 1.0
                 if weight > 0.0:
@@ -295,14 +294,16 @@ def main(filepath, files, clear_scene):
         file_size = os.path.getsize(path_to_file)
 
         br = BinaryReader(file, "<")
-        if file_extension == ".flv":
+        if file_extension == ".flv" or file_extension == ".flver":
 
-            flver0 = FLVER0_CLASS()
+            header = FlverHeader()
+            header.read(br)
+            flver0 = FLVER0_CLASS(header)
             flver0.read(br)
 
             file.close()
 
-            build_flv(flver0, filename)
+            build_flv(flver0, os.path.splitext(filename)[0])
         
         elif file_extension == ".msb":
 
@@ -312,7 +313,7 @@ def main(filepath, files, clear_scene):
 
             file.close()
 
-            #build_msb(msb, filename)
+            build_msb(msb, filename)
 
         elif file_extension == ".ani":
 
